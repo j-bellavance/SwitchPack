@@ -1,3 +1,4 @@
+SwitchPack	KEYWORD1
 Debounce	KEYWORD1
 debouncePin	KEYWORD2
 setSensitivity	KEYWORD2
