@@ -1,6 +1,7 @@
 SwitchPack	KEYWORD1
 Debounce	KEYWORD1
 debouncePin	KEYWORD2
+pin	KEYWORD2
 setSensitivity	KEYWORD2
 getSensitivity	KEYWORD2
 Contact	KEYWORD1
