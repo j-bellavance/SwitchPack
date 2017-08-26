@@ -1,5 +1,5 @@
 /*
- * Debounce.ino
+ * DebouncePullup.ino
  * Author: Jacques Bellavance
  * Date : August 9, 2017
  * Released under the GNU General Public License v3.0
