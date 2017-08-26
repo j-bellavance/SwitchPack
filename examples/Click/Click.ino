@@ -21,7 +21,7 @@
  * 
 */
 
-#include "SwitchPack.h"
+#include <SwitchPack.h>
 Click switch2(2, PULLUP);
 Click switch6(6, PULLDOWN);
 
