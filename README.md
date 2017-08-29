@@ -1,7 +1,7 @@
 # SwitchPack
 A complete switch toolbox
 
-With 17 example sketches and a complete Tutorial.
+With 19 example sketches and a complete Tutorial (tutoriel en français également).
 
 All switches are debounced and protected against EMF interferences by the lightning fast EdgeDebouncer algorithm.
 
