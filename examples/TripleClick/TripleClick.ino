@@ -52,6 +52,7 @@ void blink(byte count) {
 void setup() {
   key.begin();
   key.setMaxClicks(3);
+  pinMode(LED_PIN, OUTPUT);
 }
 
 //loop=======================
