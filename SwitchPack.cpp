@@ -92,13 +92,13 @@ void Contact::begin(byte pin, byte mode) { MYpin = pin;	MYmode = mode; begin(); 
 //  we just to have negate the result if in pullup mode
 //------------------------------------------------------------------------------------------
 void Contact::update() {
-	byte newStatus = debounce(MYpin);
-	if (MYmode == PULLUP) newStatus = !newStatus;
-	if (MYstatus == OPEN && newStatus == CLOSED) MYrose = true;
-	else                                         MYrose = false;
-	if (MYstatus == CLOSED && newStatus == OPEN) MYfell = true;
-	else                                         MYfell = false;
-	MYstatus = newStatus;
+  byte newStatus = debounce(MYpin);
+  if (MYmode == PULLUP) newStatus = !newStatus;
+  if (MYstatus == OPEN && newStatus == CLOSED) MYrose = true;
+  else                                         MYrose = false;
+  if (MYstatus == CLOSED && newStatus == OPEN) MYfell = true;
+  else                                         MYfell = false;
+  MYstatus = newStatus;
 }//update------------------------------------------------------------------------------------
 
  //updatingMethods=============================================
@@ -157,8 +157,6 @@ DoubleClick::DoubleClick(byte pin) : Click(pin) {}
 //--------------------------------------------------------------------
 DoubleClick::DoubleClick(byte pin, byte mode) : Click(pin, mode) {}
 //--------------------------------------------------------------------------------
-DoubleClick::DoubleClick(byte pin, int limit) : Click(pin) { MYlimit = limit; }
-//-------------------------------------------------------------------------------------------------
 DoubleClick::DoubleClick(byte pin, byte mode, int limit) : Click(pin, mode) { MYlimit = limit; }
 
 //clickCount========================================================================================
