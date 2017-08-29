@@ -32,7 +32,7 @@
 #define ROSE_PIN 10
 #define FELL_PIN 11
 #define CLOSED_PIN 13
-#define BLINK_TIME 5
+#define BLINK_TIME 10
 
 #include "SwitchPack.h"
 Contact key(KEY_PIN, PULLUP);
@@ -49,13 +49,17 @@ void setup() {
 void loop(){
   key.update();
   if (key.getOpen())   digitalWrite(CLOSED_PIN, LOW);
-  if (key.getRose())   digitalWrite(ROSE_PIN, HIGH);
-                       delay(BLINK_TIME);
-                       digitalWrite(ROSE_PIN, LOW);
+  if (key.getRose()) { 
+    digitalWrite(ROSE_PIN, HIGH);
+    delay(BLINK_TIME);
+    digitalWrite(ROSE_PIN, LOW);
+  }  
   if (key.getClosed()) digitalWrite(CLOSED_PIN, HIGH);
-  if (key.getFell())   digitalWrite(FELL_PIN, HIGH);
-                       delay(BLINK_TIME);
-                       digitalWrite(FELL_PIN, LOW);
+  if (key.getFell()) {
+    digitalWrite(FELL_PIN, HIGH);
+    delay(BLINK_TIME);
+    digitalWrite(FELL_PIN, LOW);
+  }  
 }
 
 
