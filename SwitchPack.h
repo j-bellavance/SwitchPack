@@ -63,21 +63,21 @@ class Debounce {
 class Contact : public Debounce {
   public:
     Contact();
-	  Contact(byte pin);
-  	Contact(byte pin, byte mode);
-	  virtual void begin();
-	  virtual void begin(byte pin, byte mode);
+    Contact(byte pin);
+    Contact(byte pin, byte mode);
+    virtual void begin();
+    virtual void begin(byte pin, byte mode);
     virtual void update();
-	  virtual bool closed();
+    virtual bool closed();
     virtual bool open();
-	  virtual bool rose();
+    virtual bool rose();
     virtual bool fell();
-		virtual bool getClosed() const;
-		virtual bool getOpen() const;
-		virtual bool getRose() const;
-		virtual bool getFell() const;
-		virtual void setPin(byte pin);
-		virtual void setMode(byte mode);
+    virtual bool getClosed() const;
+    virtual bool getOpen() const;
+    virtual bool getRose() const;
+    virtual bool getFell() const;
+    virtual void setPin(byte pin);
+    virtual void setMode(byte mode);
   protected:
     byte MYpin;
     byte MYmode = PULLUP;
@@ -85,7 +85,7 @@ class Contact : public Debounce {
     bool MYrose;
     bool MYfell;
     byte MYedge = STABLE;
-private:
+  private:
     bool firstPass = true;
 };//Contact---------------------------------------------------
 
@@ -99,8 +99,8 @@ private:
 class Click : public Contact {
   public:
     Click();
-	  Click(byte pin);
-	  Click(byte pin, byte mode);
+    Click(byte pin);
+    Click(byte pin, byte mode);
     virtual bool clicked();
 };//Click------------------------------------------------------------
 
@@ -119,10 +119,10 @@ class Toggle : public Click {
  
   public:
     Toggle();
-  	Toggle(byte pin);
-  	Toggle(byte pin, byte mode);
-  	virtual byte readStatus();
-  	virtual byte getStatus();
+    Toggle(byte pin);
+    Toggle(byte pin, byte mode);
+    virtual byte readStatus();
+    virtual byte getStatus();
     virtual void setStatus(byte status);
   protected:
     bool MYstatus;
@@ -146,11 +146,11 @@ class Toggle : public Click {
 //---------------------------------------------------------------
 class DoubleClick : public Click {
   public:
-		DoubleClick();
-		DoubleClick(byte pin);
-		DoubleClick(byte pin, byte mode);
-		DoubleClick(byte pin, int limit);
-		DoubleClick(byte pin, byte mode, int limit);
+    DoubleClick();
+    DoubleClick(byte pin);
+    DoubleClick(byte pin, byte mode);
+    DoubleClick(byte pin, int limit);
+    DoubleClick(byte pin, byte mode, int limit);
     virtual byte clickCount();
     virtual void setLimit(int limit);
     virtual void setMaxClicks(byte maxClicks);
@@ -172,11 +172,11 @@ class DoubleClick : public Click {
 class TimedClick : public Click {
   public:
     TimedClick();
-	  TimedClick(byte pin);
-  	TimedClick(byte pin, byte mode);
-		virtual bool clicked();
+    TimedClick(byte pin);
+    TimedClick(byte pin, byte mode);
+    virtual bool clicked();
     virtual unsigned long wasLastRead();
-		virtual unsigned long clickTime();
+    virtual unsigned long clickTime();
     virtual unsigned long timeSinceLastClick();
   private:
     unsigned long MYtimeLastRead;
@@ -204,11 +204,11 @@ class TimedClick : public Click {
 class Repeater : public Contact {
   public:
     Repeater();
-		Repeater(byte pin);
-		Repeater(byte pin, byte mode);
-		Repeater(byte pin, int start, int burst);
-		Repeater(byte pin, byte mode, int start, int burst);
-		virtual bool repeatRequired();
+    Repeater(byte pin);
+    Repeater(byte pin, byte mode);
+    Repeater(byte pin, int start, int burst);
+    Repeater(byte pin, byte mode, int start, int burst);
+    virtual bool repeatRequired();
     virtual void setStart(int start);
     virtual void setBurst(int burst);
   private:
@@ -233,9 +233,9 @@ class Repeater : public Contact {
 class ModeSwitch : public Click {
   public:
     ModeSwitch();
-  	ModeSwitch(byte pin, int numModes);
-  	ModeSwitch(byte pin, byte mode, int numModes);
-  	ModeSwitch(byte pin, byte mode, int numModes, int resetAfter);
+    ModeSwitch(byte pin, int numModes);
+    ModeSwitch(byte pin, byte mode, int numModes);
+    ModeSwitch(byte pin, byte mode, int numModes, int resetAfter);
     virtual byte readMode();
     virtual byte getMode();
     virtual void resetAfter(int someTime);
@@ -272,7 +272,7 @@ class ModeSwitch : public Click {
 class Encoder : public Contact{
   public:
     Encoder();
-		Encoder(byte pinA, byte pinB);
+    Encoder(byte pinA, byte pinB);
     virtual void setPins(byte pinA, byte pinB);
     virtual void setModes(byte modeA, byte modeB);
     virtual void stepsPerClick(byte stepsPerClick);
@@ -282,10 +282,10 @@ class Encoder : public Contact{
     void setCount(int value);
     void resetCount();
   private:
-		int process(byte status);
-		int count;
-		int rotation();
-		Contact MYpinA;
+    int process(byte status);
+    int count;
+    int rotation();
+    Contact MYpinA;
     Contact MYpinB;
     byte MYstepsPerClick = 4;
 };
