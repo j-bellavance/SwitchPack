@@ -37,9 +37,13 @@ void setup() {
 //loop==============================
 void loop(){
   if (timer.clicked()) {
-    Serial.print(F("Timer was pressed for ")); Serial.print(timer.clickTime()); Serial.println(F(" milliseconds"));
+    Serial.print(F("Timer was pressed for ")); 
+    Serial.print(timer.clickTime()); 
+    Serial.println(F(" milliseconds"));
   }
   if (since.clicked()) {
-    Serial.print(F("Timer was released ")); Serial.print(timer.timeSinceLastClick()); Serial.println(F(" milliseconds ago"));
+    Serial.print(F("Timer was released ")); 
+    Serial.print(timer.timeSinceLastClick()); 
+    Serial.println(F(" milliseconds ago"));
   }
 }
