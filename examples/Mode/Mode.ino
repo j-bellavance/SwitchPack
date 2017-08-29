@@ -1,7 +1,7 @@
 /*
- * ModeWithReset.ino
+ * Mode.ino
  * Author: Jacques Bellavance
- * Date : August 9, 2017
+ * Date : August 27, 2017
  * Released under the GNU General Public License v3.0
  * 
  * Demonstrates how to use the Mode class
@@ -9,7 +9,7 @@
  * The .getMode() method returns the current mode of the switch
  * 
  * The number of modes is set on instantiation.
- * Each press pf the switch will set it in the next mode.
+ * Each press of the switch will set it in the next mode.
  * Modes are numbered from 0 to number of modes - 1
  * When the switch is in it's last mode, 
  * the next click will bring it back to 0
@@ -19,37 +19,41 @@
  * We will display decimal numbers 0..3 in binary with 2 leds
  * 
  * Connections: PULLUP
- * Ground---[Switch]---D2
- * 
- * D11---LED---R220---Ground
- * D12---LED---R220---Ground
+ * Ground---[Switch]---D4
+ * D10---LED---R220----Ground
+ * D11---LED---R220----Ground
 */
 
-#include "SwitchPack.h"
-ModeSwitch switch2(2, 4);
+#define MODE_PIN 4
+#define LED0_PIN 10
+#define LED1_PIN 11
+#define NUM_MODES 4
 
-//showDigital=============================================================
+#include "SwitchPack.h"
+ModeSwitch mode(MODE_PIN, NUM_MODES);
+
+//showDigital========================================================================
 //Display a decimal 0..3 number in binary with LEDs
-//pin 11 = Most significant bit
-//pin 12 = Least significant bit
-//------------------------------------------------------------------------
+//LED0 = Most significant bit
+//LED1 = Least significant bit
+//-----------------------------------------------------------------------------------
 void showDigital(byte decimal) {
   switch(decimal) {
-    case 0: { digitalWrite(10,  LOW); digitalWrite(11,  LOW); break; }
-    case 1: { digitalWrite(10,  LOW); digitalWrite(11, HIGH); break; }
-    case 2: { digitalWrite(10, HIGH); digitalWrite(11,  LOW); break; }
-    case 3: { digitalWrite(10, HIGH); digitalWrite(11, HIGH); break; }
+    case 0: { digitalWrite(LED0_PIN,  LOW); digitalWrite(LED1_PIN,  LOW); break; }
+    case 1: { digitalWrite(LED0_PIN,  LOW); digitalWrite(LED1_PIN, HIGH); break; }
+    case 2: { digitalWrite(LED0_PIN, HIGH); digitalWrite(LED1_PIN,  LOW); break; }
+    case 3: { digitalWrite(LED0_PIN, HIGH); digitalWrite(LED1_PIN, HIGH); break; }
   }
-}//showDigital------------------------------------------------------------
+}//showDigital-----------------------------------------------------------------------
 
-//setup=============
+//setup=====================================================
 void setup() {
-  switch2.begin();
-  pinMode(10, OUTPUT); digitalWrite(10, LOW);
-  pinMode(11, OUTPUT); digitalWrite(11, LOW);
+  mode.begin();
+  pinMode(LED0_PIN, OUTPUT); digitalWrite(LED0_PIN, LOW);
+  pinMode(LED1_PIN, OUTPUT); digitalWrite(LED1_PIN, LOW);
 }
 
 //loop==============================
 void loop(){
-  showDigital(switch2.readMode());
+  showDigital(mode.readMode());
 }

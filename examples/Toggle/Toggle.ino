@@ -1,7 +1,7 @@
 /*
  * Toggle.ino
  * Author: Jacques Bellavance
- * Date : August 9, 2017
+ * Date : August 27, 2017
  * Released under the GNU General Public License v3.0
  * 
  * Demonstrates how to use the Toggle class
@@ -12,20 +12,23 @@
  * Use the .setStatus() method to initialise it
  * 
  * Connections: PULLUP
- * Ground---[Switch]---D2
+ * Ground---[Switch]---D4
  * 
 */
 
-#include "SwitchPack.h"
-Toggle switch2(2, PULLUP);
+#define TOGGLE_PIN 4
+#define LED_PIN 13
 
-//setup================================================
+#include "SwitchPack.h"
+Toggle toggle(TOGGLE_PIN, PULLUP);
+
+//setup===================================================
 void setup() {
-  switch2.begin();
-  switch2.setStatus(0); //off when the sketch begins
+  toggle.begin();
+  toggle.setStatus(false); //off when the sketch begins
 }
 
-//loop====================================
+//loop==========================================
 void loop(){
-  digitalWrite(13, switch2.readStatus());
+  digitalWrite(LED_PIN, toggle.readStatus());
 }

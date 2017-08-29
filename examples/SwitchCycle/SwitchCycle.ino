@@ -1,61 +1,61 @@
 /*
  * SwitchCycle.ino
  * Author: Jacques Bellavance
- * Date : August 9, 2017
+ * Date : August 27, 2017
  * Released under the GNU General Public License v3.0
  * 
  * Demonstrates how to use the Contact class
- * The .closed() method returns true if the switch's contact is presently closed (conducting current).
- * The .open() method returns true if the switch's contact is presently open (not conducting current).
- * The .rose() method returns true if the last call to .closed() or to .open() was on the rise of the signal.
- * The .fell() method returns true if the last call to .closed() or to .open() was on the fall of the signal.
+ * The .update() method returns in which phase the switch is presently in:
+ * The .getClosed() method returns true if the switch's contact is presently closed
+ * The .getOpen() method returns true if the switch's contact is presently open
+ * The .getRose() method returns true if .update() saw the signal rising
+ * The .getFell() method returns true if .update() saw the signal falling
  * 
  *                                            
  * 5V                      R|---------CLOSED--------|F
- *                         I|                       |A
+ *                         O|                       |E
  *                         S|                       |L
  *                         E|                       |L
- * 0V  --------OPEN---------|                       |-----
+ * 0V  --------OPEN---------|                       |--------OPEN---------
  * 
  * When the switch is open, debug LED (pin13) is off
- * When rising, left LED (pin 11) flashes
+ * When rising, left LED (pin 10) flashes
  * When the switch is closed, debug LED (pin 13) is on
- * When falling, right LED (pin 12) flashes
- * 
+ * When falling, right LED (pin 11) flashes
  * 
  * Connections: PULLUP
- * Ground---[Switch]---D2
+ * Ground---[Switch]---D4
  * 
 */
 
+#define KEY_PIN 4
+#define ROSE_PIN 10
+#define FELL_PIN 11
+#define CLOSED_PIN 13
+#define BLINK_TIME 5
+
 #include "SwitchPack.h"
-Contact switch2(2, PULLUP);
+Contact key(KEY_PIN, PULLUP);
 
-//setup=======================
+//setup=========================
 void setup() {
-  switch2.begin();
-  pinMode(13, OUTPUT);
-  pinMode(11, OUTPUT);
-  pinMode(12, OUTPUT);
+  key.begin();
+  pinMode(ROSE_PIN, OUTPUT);
+  pinMode(FELL_PIN, OUTPUT);
+  pinMode(CLOSED_PIN, OUTPUT);
 }
 
-//loop==========================
+//loop==================================================
 void loop(){
-  if (switch2.closed()) { 
-    digitalWrite(13, HIGH); 
-    if (switch2.rose()) { 
-      digitalWrite(11, HIGH); 
-      delay(5); 
-      digitalWrite(11, LOW); 
-    }
-  }
-  else {
-    digitalWrite(13, LOW); 
-    if (switch2.fell()) { 
-      digitalWrite(12, HIGH); 
-      delay(5
-      ); 
-      digitalWrite(12, LOW); 
-    }
-  }
+  key.update();
+  if (key.getOpen())   digitalWrite(CLOSED_PIN, LOW);
+  if (key.getRose())   digitalWrite(ROSE_PIN, HIGH);
+                       delay(BLINK_TIME);
+                       digitalWrite(ROSE_PIN, LOW);
+  if (key.getClosed()) digitalWrite(CLOSED_PIN, HIGH);
+  if (key.getFell())   digitalWrite(FELL_PIN, HIGH);
+                       delay(BLINK_TIME);
+                       digitalWrite(FELL_PIN, LOW);
 }
+
+

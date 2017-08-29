@@ -1,7 +1,7 @@
 /*
  * SwitchPack Library
  * Author Jacques Bellavance
- * Date : August 15, 2017
+ * Date : August 27, 2017
  *
  * Offers 9 classes to handle switches
  * The hierarchy is as follows
@@ -24,6 +24,8 @@
 #ifndef SwitchPack_h
 #define SwitchPack_h
 
+#define OPEN 0
+#define CLOSED 1
 #define PULLUP 0
 #define PULLDOWN 1
 #define STABLE 0
@@ -42,7 +44,8 @@
 class Debounce {
   public:
     Debounce();
-    virtual byte debouncePin(byte pin);
+    virtual byte debounce(byte pin);
+    virtual byte pin(byte pin);
     virtual void setSensitivity(byte sensitivity);
     virtual byte getSensitivity();
   protected:
@@ -64,16 +67,23 @@ class Contact : public Debounce {
   	Contact(byte pin, byte mode);
 	  virtual void begin();
 	  virtual void begin(byte pin, byte mode);
+    virtual void update();
 	  virtual bool closed();
     virtual bool open();
 	  virtual bool rose();
     virtual bool fell();
+		virtual bool getClosed() const;
+		virtual bool getOpen() const;
+		virtual bool getRose() const;
+		virtual bool getFell() const;
 		virtual void setPin(byte pin);
 		virtual void setMode(byte mode);
   protected:
     byte MYpin;
     byte MYmode = PULLUP;
     bool MYstatus = false;
+    bool MYrose;
+    bool MYfell;
     byte MYedge = STABLE;
 private:
     bool firstPass = true;

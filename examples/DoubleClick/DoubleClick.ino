@@ -11,43 +11,42 @@
  * 1 = 1 click
  * 2 = 2 clicks
  * 
- * We will click the switch during half a second
+ * We will have half a second (500) milliseconds 
+ * to perform a single or a double-click
  * After that, we will blink the debug LED (pin 13) 
  * the number of times that we clicked the switch
  * 
  * Connections: PULLUP
- * Ground---[Switch]---D2
- * 
- * Connections: PULLDOWN
- * +5V---[Switch]---|---[10Kohm Resistor]---Ground
- *                  |-----------------------D6 
+ * Ground---[Switch]---D4
 */
 
-#include "SwitchPack.h"
-DoubleClick switch2(2, PULLUP, 500);
-DoubleClick switch6(6, PULLDOWN, 500);
+#define KEY_PIN 4
+#define LED_PIN 13
+#define BLINK_TIME 300
+#define REACTION_TIME 500
 
-//blink=======================================
-//Blink the debug LED (pin 13)
-//for 500 milliseconds as many times as count
-//--------------------------------------------
+#include "SwitchPack.h"
+DoubleClick key(KEY_PIN, PULLUP, REACTION_TIME);
+
+//blink=========================================
+//Blink the debug LED (pin 13) "count" times
+//If count = 0, the for loop will not be done
+//----------------------------------------------
 void blink(byte count) {
   for (int i = 1 ; i <= count; i++) {
-    digitalWrite(13, HIGH);
-    delay(300);
-    digitalWrite(13, LOW);
-    delay(300);
+    digitalWrite(LED_PIN, HIGH);
+    delay(BLINK_TIME);
+    digitalWrite(LED_PIN, LOW);
+    delay(BLINK_TIME);
   }  
-}//blink--------------------------------------
+}//blink----------------------------------------
 
-//setup=============
+//setup==========
 void setup() {
-  switch2.begin();
-  switch6.begin();
+  key.begin();
 }
 
-//loop===========================
+//loop=======================
 void loop(){
-  blink(switch2.clickCount());
-  blink(switch6.clickCount());
+  blink(key.clickCount());
 }

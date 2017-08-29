@@ -27,33 +27,34 @@
  *                  |-----------------------D6 
 */
 
-#include "SwitchPack.h"
-DoubleClick switch2(2, PULLUP, 500);
-DoubleClick switch6(6, PULLDOWN, 500);
+#define KEY_PIN 4
+#define LED_PIN 13
+#define BLINK_TIME 300
+#define REACTION_TIME 500
 
-//blink=======================================
-//Blink the debug LED (pin 13)
-//for 500 milliseconds as many times as count
-//--------------------------------------------
+#include "SwitchPack.h"
+DoubleClick key(KEY_PIN, PULLUP, REACTION_TIME);
+
+//blink=========================================
+//Blink the debug LED (pin 13) "count" times
+//If count = 0, the for loop will not be done
+//----------------------------------------------
 void blink(byte count) {
   for (int i = 1 ; i <= count; i++) {
-    digitalWrite(13, HIGH);
-    delay(500);
-    digitalWrite(13, LOW);
-    delay(500);
+    digitalWrite(LED_PIN, HIGH);
+    delay(BLINK_TIME);
+    digitalWrite(LED_PIN, LOW);
+    delay(BLINK_TIME);
   }  
-}//blink--------------------------------------
+}//blink----------------------------------------
 
-//setup=========================
+//setup==========
 void setup() {
-  switch2.begin();
-  switch2.changeMaxClicks(3);
-  switch6.begin();
-  switch6.changeMaxClicks(3);
+  key.begin();
+  key.setMaxClicks(3);
 }
 
-//loop===========================================
+//loop=======================
 void loop(){
-  blink(switch2.clickCount());
-  blink(switch6.clickCount());
+  blink(key.clickCount());
 }

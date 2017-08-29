@@ -1,3 +1,24 @@
+/*
+* SwitchPack Library
+* Author Jacques Bellavance
+* Date : August 27, 2017
+*
+* Offers 9 classes to handle switches
+* The hierarchy is as follows
+*
+*                                 [   Debounce   ]
+*                                         |
+*                                         |
+*                                 [   Contact    ]
+*                     ____________________|....................
+*                     |                   |                   :
+*             [   Repeater   ]    [     Click    ]    [    Encoder   ]
+*            _____________________________|_______________________________
+*            |                   |                   |                   |
+*    [    Toggle    ]    [ DoubleClick  ]    [  ModeSwitch  ]    [  TimedClick  ]
+*
+*/
+
 #include <Arduino.h>
 #include "SwitchPack.h"
 
@@ -5,34 +26,35 @@
 //Debounce===============
 Debounce::Debounce(){} 
 
-//debouncePin==================================================================================
+//debounce=====================================================================================
 //pin: the pin that has to be debounced
 //ABSTRACT
 //  Do
-//    Read pin 16 times
+//    Read pin n times (between 1 and 32)
 //  While (pin reads are not identical)
 //See https://github.com/j-bellavance/EdgeDebounce for the complete tutorial.
 //---------------------------------------------------------------------------------------------
-byte Debounce::debouncePin(byte pin) {
+byte Debounce::pin(byte pin) { return debounce(pin); } //Alias (See DebounceAnyPin)
+//---------------------------------------------------------------------------------------------
+byte Debounce::debounce(byte pin) {
   unsigned long pinState;
   do {
     pinState = 0xffffffff;
     for (byte i = 1; i <= MYsensitivity; i++) pinState = (pinState << 1) | digitalRead(pin);
   } while ((pinState != debounceDontCare) && (pinState != 0xffffffff));
   return byte(pinState & 0x00000001);
-}//debouncePin---------------------------------------------------------------------------------
+}//debounce------------------------------------------------------------------------------------
 
-//setSensitivity=================================================================
+//setSensitivity====================================================
 //Sets the number of times that the pin is probed per burst reads
-//-------------------------------------------------------------------------------
+//Thanks to Jiggy-Ninja for the expression
+//------------------------------------------------------------------
 void Debounce::setSensitivity(byte sensitivity) {
   if (sensitivity >= 1 && sensitivity <= 32) {
     MYsensitivity = sensitivity;
-    debounceDontCare = 0xffffffff;
-    for (byte i = 0; i < sensitivity; i++) 
-      debounceDontCare = debounceDontCare << 1 | 0;
+    debounceDontCare = ~((1UL<<sensitivity)-1);
   }
-}//setSensitivity----------------------------------------------------------------
+}//setSensitivity---------------------------------------------------
 
 //getSensitivity=======================================================
 //Returns the number of times that the pin is probed per burst reads
@@ -61,7 +83,7 @@ void Contact::begin() {	pinMode(MYpin, MYmode == PULLDOWN ? INPUT : INPUT_PULLUP
 //----------------------------------------------------------------------------------
 void Contact::begin(byte pin, byte mode) { MYpin = pin;	MYmode = mode; begin(); }
 
-//closed===================================================================================
+//update===================================================================================
 //ABOUT MYmode:
 //  The goal is to have a consistent answer about a switches' status
 //  whether the pin is wired with a pullup or a pulldown resistor.
@@ -69,27 +91,30 @@ void Contact::begin(byte pin, byte mode) { MYpin = pin;	MYmode = mode; begin(); 
 //  Since the pullup setup returns the opposite of pulldown,
 //  we just to have negate the result if in pullup mode
 //------------------------------------------------------------------------------------------
-bool Contact::closed() {
-  byte pinStatus = debouncePin(MYpin);           //Debounce pin
-  if (MYmode == PULLUP) pinStatus = !pinStatus;  //Reverse if PULLUP
-  if (MYstatus == pinStatus) MYedge = STABLE;    //No change in status
-  else {                                         //Change in status
-    if (pinStatus) MYedge = RISING;                //Pin is rising (status is HIGH)
-    else           MYedge = FALLING;               //Pin is falling
-  }
-  MYstatus = pinStatus;                          //Update with new status
-  return pinStatus;                              //Return status
-}//closed------------------------------------------------------------------------------------
+void Contact::update() {
+	byte newStatus = debounce(MYpin);
+	if (MYmode == PULLUP) newStatus = !newStatus;
+	if (MYstatus == OPEN && newStatus == CLOSED) MYrose = true;
+	else                                         MYrose = false;
+	if (MYstatus == CLOSED && newStatus == OPEN) MYfell = true;
+	else                                         MYfell = false;
+	MYstatus = newStatus;
+}//update------------------------------------------------------------------------------------
 
-//open======================================
-bool Contact::open() { return !closed(); }
-//rose==============================================
-bool Contact::rose() { return MYedge == RISING; }
-//fell===============================================
-bool Contact::fell() { return MYedge == FALLING; }
+ //updatingMethods=============================================
+bool Contact::closed() { update(); return MYstatus; }
+bool Contact::open() { update(); return !MYstatus; }
+bool Contact::rose() { update(); return MYrose; }
+bool Contact::fell() { update(); return MYfell; }
+
+//statusMethods=====================================================
+bool Contact::getClosed() const { return MYstatus; }
+bool Contact::getOpen()   const { return !MYstatus; }
+bool Contact::getRose() const { return MYrose; }
+bool Contact::getFell() const { return MYfell; }
 
 //==============================================================================================================Click
-//Click======================
+//Click========================
 //-----------------------------
 Click::Click(): Contact() {}
 //-----------------------------------------
@@ -102,8 +127,8 @@ Click::Click(byte pin, byte mode) : Contact(pin, mode) {}
 //Waits for the contact to be re-opened before returning
 //---------------------------------------------------------
 bool Click::clicked() {
-  if (open() && fell()) return true;
-  else                  return false;
+  if (fell()) return true;
+  else        return false;
  }//clicked-------------------------------------------------
 
 //=============================================================================================================Toggle
@@ -175,10 +200,11 @@ TimedClick::TimedClick(byte pin, byte mode) : Click(pin, mode) {}
 //--------------------------------------------------------------------------------
 bool TimedClick::clicked() {
 	MYtimeLastRead = millis();
-  if (closed() && rose()) {       //read the switch and if just rose
+  update();
+  if (getRose()) {       //read the switch and if just rose
     MYstartTime = millis();         //Mark start time
   }
-	if (fell()) {                   //If it just rose
+	if (getFell()) {                   //If it just rose
     MYendTime = millis();           //Mark end time
     return true;                    //Just clicked
   }
@@ -191,8 +217,8 @@ unsigned long TimedClick::wasLastRead() {
 
 //clickTime==============================================
 unsigned long TimedClick::clickTime() 
-  { if (fell()) return MYendTime - MYstartTime;
-    else        return 0; }
+  { if (getFell()) return MYendTime - MYstartTime;
+    else           return 0; }
 
 //timeSinceLastClick=============================
 unsigned long TimedClick::timeSinceLastClick()
@@ -216,14 +242,15 @@ Repeater::Repeater(byte pin, byte mode, int start, int burst) : Contact(pin, mod
 //When read repeatedly, it will return true every time the action is to be made.
 //--------------------------------------------------------------------------------------------
 bool Repeater::repeatRequired() {
-  if (open()) return false;             //If open, just return "NOT Required"
-  if (rose()) {                         //If the switch was just closed
-     MYchrono = millis() + MYstart;       //Set chronometer to when the bursts should start
-     return true;                         //And return "Required"
+  update();
+  if (getOpen()) return false;             //If open, just return "NOT Required"
+  if (getRose()) {                         //If the switch was just closed
+     MYchrono = millis() + MYstart;          //Set chronometer to when the bursts should start
+     return true;                            //And return "Required"
   }
-  if (millis() >= MYchrono) {           //If time is up
-    MYchrono = millis() + MYburst;        //Reset chronometer for next burst
-    return true;                          //And return "Required"
+  if (millis() >= MYchrono) {             //If time is up
+    MYchrono = millis() + MYburst;          //Reset chronometer for next burst
+    return true;                            //And return "Required"
   }
   return false;
 }//repeatRequired------------------------------------------------------------------------------
@@ -271,8 +298,8 @@ byte ModeSwitch::getMode() {
 	return MYcurrentMode;                                        //Return current mode
 }//getMode-----------------------------------------------------------------------------------
 
-//resetAfter=================================================================
-void ModeSwitch::resetAfter(int someTime) { MYresetAfter = someTime; }
+//resetAfter====================================================================================
+void ModeSwitch::resetAfter(int someTime) { MYresetAfter = someTime; MYresetAllowed = true; }
 
 //============================================================================================================Encoder
 //Encoder====================================================
@@ -302,10 +329,10 @@ int Encoder::process(byte status) {
   int temp = (status << 1) -1;  count += temp;  return temp; 
 }//rotation---------------------------------------------------------------------
 int Encoder::rotation() {
-  int pinA = MYpinA.closed();
+  MYpinA.update();
 	int pinB = MYpinB.closed();
-	if (MYpinA.rose()) return process(pinB);
-	if (MYstepsPerClick == 2 && MYpinA.fell()) return process(!pinB);
+	if (MYpinA.getRose()) return process(pinB);
+	if (MYstepsPerClick == 2 && MYpinA.getFell()) return process(!pinB);
   return 0;
 }//rotation---------------------------------------------------------------------
 

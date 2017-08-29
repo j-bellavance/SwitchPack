@@ -6,9 +6,8 @@
  * 
  * Demonstrates how to use the Encoder class
  * Read a 4 steps per click encoder
- * .getRotation()
- *   returns CW (1) or CCW (-1)
- *   or 0 if not turned
+ * .getCount()
+ *   returns the current value of the internal counter
  * 
  * Connections: PULLUP
  * [Encoder pin A]---D7
@@ -31,11 +30,9 @@ void setup() {
 
 //loop=================================
 void loop(){
-  int rotation;
-  rotation = anEncoder.getRotation();
-  if (rotation != 0) { 
-    Serial.println(rotation);
-  }
+  int count;
+  count = anEncoder.getCount();
+  Serial.println(count);
 }
 
 

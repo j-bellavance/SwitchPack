@@ -1,59 +1,70 @@
 /*
  * MiniKeyboard.ino
  * Author: Jacques Bellavance
- * Date : August 9, 2017
+ * Date : August 27, 2017
  * Released under the GNU General Public License v3.0
  * 
  * We will use different switches (5 of them) to implement a mini keyboard.
  * Switches 3 to 5 will be Repeater switches that will send the characters 'a', 'b' or 'c'
- * They will be placed in the MYkeypad[] array
+ * They will be placed in the keypad[] array
  * Switch 2 will be a Contact switch used as a "Shift" key
  * Switch 6 will be a Toggle used as a "Lock upperCase" key
  * The debug LED (pin 13) will be used to show if the keyboard is in "Locked uppercase" mode
+ * 
 */
 
 #define NO_KEY 99
+#define SHIFT_PIN 2
+#define LOCK_PIN 6
 #define START 500
 #define BURST 50
-#define keyCount 3
+#define KEY_COUNT 3
+#define LED_PIN 13
 
-#include "SwitchPack.h"
-Repeater MYkeypad[] = {Repeater(3, PULLUP, START, BURST), Repeater(4, PULLUP, START, BURST), Repeater(5, PULLUP, START, BURST)};
-Contact switch2(2, PULLUP);
-Toggle switch6(6, PULLDOWN);
+#include <SwitchPack.h>
+Repeater keypad[] = {Repeater(3, PULLUP, START, BURST), 
+                     Repeater(4, PULLUP, START, BURST), 
+                     Repeater(5, PULLUP, START, BURST)};
+                       
+Contact shift(SHIFT_PIN, PULLUP);
+Toggle lock(LOCK_PIN, PULLDOWN);
 
-const char k[keyCount][2] = {'a', 'A', 
-                             'b', 'B',
-                             'c', 'C'};
+//The line pointer selects the letter
+//The column pointer selects upper/lower case
+const char k[KEY_COUNT][2] = {'a', 'A', 
+                              'b', 'B',
+                              'c', 'C'};
 
-//readKeypad======================================
+//readKeypad====================================
 //Shows how to use a for( ; ; ) construct
 //to read all the Repeater switches
-//------------------------------------------------
+//Returns the key to print (0..2) if required
+//Returns NO_KEY otherwise
+//----------------------------------------------
 byte readKeypad() {
-  for (int i = 0 ; i < keyCount ; i++) {
-    if (MYkeypad[i].repeatRequired()) return i;
+  for (int i = 0 ; i < KEY_COUNT ; i++) {
+    if (keypad[i].repeatRequired()) return i;
   }
   return NO_KEY;
-}//readKeypad-------------------------------------
+}//readKeypad-----------------------------------
 
-//setup===============================================
+//setup==============================================
 void setup() {
   Serial.begin(9600);
-  for (int i = 0 ; i < 3 ; i++) MYkeypad[i].begin();
-  switch2.begin();
-  switch6.begin();
-  pinMode(13, OUTPUT);
+  for (int i = 0 ; i < 3 ; i++) keypad[i].begin();
+  shift.begin();
+  lock.begin();
+  pinMode(LED_PIN, OUTPUT);
 }
 
-//loop===================================================
+//loop==========================================================================================================================
 void loop(){
-  bool uppercaseMode = switch6.readStatus();
-  digitalWrite(13, uppercaseMode);
-  byte key = readKeypad();
-  if (key != NO_KEY) {
-    bool upper = switch2.closed() || uppercaseMode;
-    Serial.print(k[key][upper]);
+  bool uppercaseMode = lock.readStatus();                  //Read lock status
+  digitalWrite(LED_PIN, uppercaseMode);                    //Update lock status LED
+  byte key = readKeypad();                                 //Read the keypad
+  if (key != NO_KEY) {                                     //If a key is required (NOT NO_KEY)
+    bool upper = shift.closed() || uppercaseMode;            //Current uppercase status = shift is closed OR in uppercaseMode
+    Serial.print(k[key][upper]);                             //Send character to the serial monitor
   }
 }
 
